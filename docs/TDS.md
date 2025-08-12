@@ -1,59 +1,61 @@
-# Technical Design Specification (TDS): Smoke Log App v0.1 (MVP)
+# Technical Design Specification (TDS): Smoke Log App v0.2
 
 ## 1. Objective
-This document defines the software architecture, data model, and component structure for the Smoke Log App MVP. It is the technical implementation plan for the requirements outlined in the PRD.
+This document updates the software architecture to support editable remarks and outlines the implementation plan for this feature. It builds upon the v0.1 MVP.
 
-## 2. Architecture
-The application will be built using the **Model-View-ViewModel (MVVM)** architecture to ensure a clean separation of concerns, testability, and scalability for future enhancements.
+## 2. Architecture (Unchanged)
+The application will continue to use the **Model-View-ViewModel (MVVM)** architecture.
 
-*   **Model (Data Layer):** Manages the application's data and business logic. This will be handled by the Room Persistence Library, which includes the database, entities (data tables), and Data Access Objects (DAOs).
-*   **View (UI Layer):** The user interface, built with Jetpack Compose. It observes the ViewModel for state changes and forwards user interactions to it. It is passive and does not contain business logic.
-*   **ViewModel:** Acts as a bridge between the Model and the View. It holds the UI state, processes user inputs, and fetches data from the Model, exposing it to the View in an observable format.
+## 3. Data Model (Revised)
+To support editable remarks, the database will be normalized into two tables with a one-to-many relationship. The database version will be incremented, and a destructive migration is acceptable for this version.
 
-## 3. Data Model (Room Entity)
-A single table will be used to store log entries.
+*   **Table 1: `remarks`** (New)
+    *   **Entity:** `Remark.kt`
+    *   **Columns:**
+        *   `id`: `Int` - Primary Key, Auto-generated.
+        *   `text`: `String` - The remark text (e.g., "With Coffee").
 
-*   **Database Table:** `log_entries`
-*   **Entity:** `LogEntry.kt`
-*   **Columns:**
-    *   `id`: `Int` - Primary Key, Auto-generated.
-    *   `timestamp`: `Long` - The exact time of the log in milliseconds since epoch.
-    *   `remark`: `String?` - The optional text remark. Nullable to allow for logs without a remark.
+*   **Table 2: `log_entries`** (Modified)
+    *   **Entity:** `LogEntry.kt`
+    *   **Columns:**
+        *   `id`: `Int` - Primary Key, Auto-generated. (Unchanged)
+        *   `timestamp`: `Long` - The exact time of the log. (Unchanged)
+        *   `remarkId`: `Int?` - Foreign Key referencing `remarks.id`. Nullable.
 
-## 4. Component Plan
-The project will be structured into the following files/classes:
+*   **Relational View:** A new data class `LogEntryWithRemark` will be created to combine a `LogEntry` with its corresponding `Remark` for display purposes.
+
+## 4. Component Plan (Revised for v0.2)
 
 ### 4.1. Data Layer (Model)
-*   **`LogEntry.kt` (Entity):**
-    *   A `data class` annotated with `@Entity`.
-    *   Defines the table structure as specified in Section 3.
-*   **`LogEntryDao.kt` (DAO):**
-    *   An `interface` annotated with `@Dao`.
-    *   Provides methods to interact with the database.
-    *   **Functions:**
-        *   `insert(logEntry: LogEntry)`: A `suspend` function to add a new entry.
-        *   `getAllEntries(): Flow<List<LogEntry>>`: Returns all log entries, ordered by timestamp descending, wrapped in a `Flow` for real-time UI updates.
-*   **`AppDatabase.kt` (Database):**
-    *   An `abstract class` extending `RoomDatabase`.
-    *   Defines the database configuration, lists the entities (`LogEntry`), and provides access to the DAO.
+*   **`Remark.kt` (New Entity):** A data class defining the `remarks` table.
+*   **`RemarkDao.kt` (New DAO):** An interface to manage `Remark` entities (`insert`, `update`, `delete`, `getAll`).
+*   **`LogEntry.kt` (Modified Entity):** The `remark: String?` column will be replaced with `remarkId: Int?`.
+*   **`LogEntryDao.kt` (Modified DAO):**
+    *   The `getAllEntries()` function will be updated to perform a database join and return a `Flow<List<LogEntryWithRemark>>`.
+    *   The `insert(logEntry: LogEntry)` function remains but will now receive entries with `remarkId`.
+*   **`AppDatabase.kt` (Modified Database):**
+    *   The `@Database` annotation will be updated to include `Remark::class`.
+    *   The database `version` will be incremented to `2`.
+    *   The database builder will include `.fallbackToDestructiveMigration()`.
+    *   An abstract function for `remarkDao()` will be added.
 
-### 4.2. Business Logic Layer (ViewModel)
-*   **`LogViewModel.kt`:**
-    *   Extends AndroidX `ViewModel`.
-    *   **Responsibilities:**
-        *   Holds the list of log entries fetched from the DAO as a `StateFlow`.
-        *   Exposes a function `addLog(remark: String?)` which creates a `LogEntry` object with the current timestamp and calls the DAO's `insert` function within a coroutine.
-        *   Holds the hard-coded list of remarks.
-        *   Holds the state for the dropdown menu's selected item.
+### 4.2. Business Logic & UI (New "Remark Settings" Feature)
+*   **`RemarkSettingsViewModel.kt` (New):** A `ViewModel` to manage the UI state for the remarks settings screen. It will interact with the `RemarkDao`.
+*   **`RemarkSettingsScreen.kt` (New):** A new Composable screen that displays a list of all `Remark`s. It will include UI for adding a new remark and for editing an existing remark (initially no delete).
 
-### 4.3. UI Layer (View)
-*   **`MainActivity.kt`:**
-    *   The app's main entry point.
-    *   Responsible for setting up the `ViewModel` and calling the main Composable screen.
-*   **`LogScreen.kt`:**
-    *   Contains the main Composable function, `LogScreen`.
-    *   **Responsibilities:**
-        *   Collects the `StateFlow` of log entries from the `LogViewModel`.
-        *   Builds the UI layout containing the log button, remark dropdown, and the list of entries.
-        *   Calls the `ViewModel`'s `addLog` function when the user taps the button.
-        *   Uses a `LazyColumn` to efficiently display the list of log entries.
+### 4.3. Business Logic & UI (Main Logging Feature Modifications)
+*   **`LogViewModel.kt` (Modified):**
+    *   Will now fetch data from the DAO as a `StateFlow` of `LogEntryWithRemark`.
+    *   The `addLog` function will be updated to accept a nullable `remarkId: Int`.
+    *   Will fetch the list of `Remark` objects for the dropdown.
+*   **`LogScreen.kt` (Modified):**
+    *   The dropdown will be populated with `Remark` objects. Its state will now hold the selected `remarkId`.
+    *   The `LazyColumn` will display the `LogEntryWithRemark` objects.
+    *   A navigation element (e.g., an `IconButton`) will be added to navigate to the `RemarkSettingsScreen`.
+
+## 5. Phased Implementation Plan
+
+*   **Phase 1: Additive Data Layer.** Implement the new `Remark.kt` entity and `RemarkDao.kt`. Update `AppDatabase.kt` to version 2 with destructive migration. The app will remain runnable.
+*   **Phase 2: Independent Settings UI.** Build the `RemarkSettingsScreen` and its `ViewModel`. Provide a temporary navigation path to it. This screen will be for adding and editing only. The app will remain runnable.
+*   **Phase 3: Core Refactor.** Modify the `LogEntry` entity, `LogEntryDao`, `LogViewModel`, and `LogScreen` to use the new foreign key relationship. This is the main refactoring step.
+*   **Phase 4: Add Delete Functionality.** Implement the delete feature (e.g., via long-press and confirmation dialog) in the `RemarkSettingsScreen` and handle the logic for orphaned log entries.

@@ -5,10 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [LogEntry::class], version = 1, exportSchema = false)
+@Database(entities = [LogEntry::class, Remark::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun logEntryDao(): LogEntryDao
+    abstract fun remarkDao(): RemarkDao
 
     companion object {
         @Volatile
@@ -20,7 +21,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "smoke_log_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
