@@ -8,5 +8,5 @@ data class LogEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val timestamp: Long,
-    val remark: String?
+    val remarkId: Int?
 )

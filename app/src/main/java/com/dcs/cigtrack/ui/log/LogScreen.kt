@@ -8,13 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-// import androidx.lifecycle.viewmodel.compose.viewModel // No longer needed for default
-import com.dcs.cigtrack.data.LogEntry
+import com.dcs.cigtrack.data.LogEntry // Keep for LogEntry itself if needed, or remove if only LogEntryWithRemark is used directly
+import com.dcs.cigtrack.data.LogEntryWithRemark // Added import
+import com.dcs.cigtrack.data.Remark
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,21 +22,18 @@ fun LogScreen(
     modifier: Modifier = Modifier
 ) {
     // Collect state from ViewModel
-    val logEntries by logViewModel.logEntries.collectAsState()
-    val remarks = logViewModel.remarks
+    val logEntries by logViewModel.logEntries.collectAsState() // Now a List<LogEntryWithRemark>
+    val remarksList by logViewModel.remarks.collectAsState()
 
-    // State for UI controls
-    var selectedRemark by remember { mutableStateOf<String?>(null) }
+    var selectedRemark by remember { mutableStateOf<Remark?>(null) }
     var expanded by remember { mutableStateOf(false) }
 
-    // --- FIX: DECLARE THE DATE FORMATTER HERE ---
     val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm:ss", Locale.getDefault()) }
 
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Dropdown for remarks
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
@@ -46,7 +42,7 @@ fun LogScreen(
                 .padding(horizontal = 16.dp)
         ) {
             OutlinedTextField(
-                value = selectedRemark ?: "Select Remark",
+                value = selectedRemark?.text ?: "Select Remark",
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Remark") },
@@ -59,31 +55,30 @@ fun LogScreen(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                remarks.forEach { remark ->
+                remarksList.forEach { remark ->
                     DropdownMenuItem(
-                        text = { Text(remark) },
+                        text = { Text(remark.text) },
                         onClick = {
                             selectedRemark = remark
                             expanded = false
                         }
                     )
                 }
-                DropdownMenuItem(
-                    text = { Text("None") },
-                    onClick = {
-                        selectedRemark = null
-                        expanded = false
-                    }
-                )
+                 DropdownMenuItem(
+                     text = { Text("None") },
+                     onClick = {
+                         selectedRemark = null
+                         expanded = false
+                     }
+                 )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Button to add log
         Button(
             onClick = {
-                logViewModel.addLog(selectedRemark)
+                logViewModel.addLog(selectedRemark?.id)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -95,7 +90,6 @@ fun LogScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // List of log entries
         if (logEntries.isEmpty()) {
             Text(
                 text = "No logs yet. Add your first one!",
@@ -106,8 +100,9 @@ fun LogScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
-                items(logEntries) { entry ->
-                    LogEntryItem(entry = entry, dateFormatter = dateFormatter) // Pass the formatter
+                items(logEntries) { entryWithRemark -> // entry is now LogEntryWithRemark
+                    // Pass the LogEntryWithRemark object to LogEntryItem
+                    LogEntryItem(entry = entryWithRemark, dateFormatter = dateFormatter)
                     HorizontalDivider()
                 }
             }
@@ -116,19 +111,22 @@ fun LogScreen(
 }
 
 @Composable
-fun LogEntryItem(entry: LogEntry, dateFormatter: SimpleDateFormat) {
+// Updated to accept LogEntryWithRemark
+fun LogEntryItem(entry: LogEntryWithRemark, dateFormatter: SimpleDateFormat) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp), // Vertical padding for list items remains
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = entry.remark ?: "No remark",
+            // Display remark text from the related Remark object
+            text = entry.remark?.text ?: "No Remark",
             style = MaterialTheme.typography.bodyLarge
         )
         Text(
-            text = dateFormatter.format(Date(entry.timestamp)), // Use the passed-in formatter
+            // Access timestamp from the embedded LogEntry object
+            text = dateFormatter.format(Date(entry.logEntry.timestamp)),
             style = MaterialTheme.typography.bodyMedium
         )
     }

@@ -29,7 +29,8 @@ class MainActivity : ComponentActivity() {
 
         val logApplication = application as LogApplication
         val logEntryDao = logApplication.database.logEntryDao()
-        val logViewModelFactory = LogViewModelFactory(logEntryDao)
+        val remarkDao = logApplication.database.remarkDao()
+        val logViewModelFactory = LogViewModelFactory(logEntryDao, remarkDao)
 
         setContent {
             CigTrackTheme {
