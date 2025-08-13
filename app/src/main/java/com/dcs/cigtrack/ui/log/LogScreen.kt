@@ -1,5 +1,7 @@
 package com.dcs.cigtrack.ui.log
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,11 +13,12 @@ import androidx.compose.ui.unit.dp
 import com.dcs.cigtrack.data.LogEntry // Keep for LogEntry itself if needed, or remove if only LogEntryWithRemark is used directly
 import com.dcs.cigtrack.data.LogEntryWithRemark // Added import
 import com.dcs.cigtrack.data.Remark
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LogScreen(
     logViewModel: LogViewModel,
@@ -27,8 +30,37 @@ fun LogScreen(
 
     var selectedRemark by remember { mutableStateOf<Remark?>(null) }
     var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var entryToDelete by remember { mutableStateOf<LogEntryWithRemark?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm:ss", Locale.getDefault()) }
+
+    if (showDialog && entryToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Delete Log Entry") },
+            text = { Text("Are you sure you want to delete this log entry?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            entryToDelete?.let { logViewModel.deleteLog(it) }
+                        }
+                        showDialog = false
+                        entryToDelete = null
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -102,7 +134,14 @@ fun LogScreen(
             ) {
                 items(logEntries) { entryWithRemark -> // entry is now LogEntryWithRemark
                     // Pass the LogEntryWithRemark object to LogEntryItem
-                    LogEntryItem(entry = entryWithRemark, dateFormatter = dateFormatter)
+                    LogEntryItem(
+                        entry = entryWithRemark, 
+                        dateFormatter = dateFormatter,
+                        onLongClick = {
+                            entryToDelete = entryWithRemark
+                            showDialog = true
+                        }
+                    )
                     HorizontalDivider()
                 }
             }
@@ -110,12 +149,21 @@ fun LogScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 // Updated to accept LogEntryWithRemark
-fun LogEntryItem(entry: LogEntryWithRemark, dateFormatter: SimpleDateFormat) {
+fun LogEntryItem(
+    entry: LogEntryWithRemark, 
+    dateFormatter: SimpleDateFormat,
+    onLongClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .combinedClickable(
+                onClick = { /* No action on simple click */ },
+                onLongClick = onLongClick
+            )
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

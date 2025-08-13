@@ -1,6 +1,7 @@
 package com.dcs.cigtrack.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -21,6 +22,9 @@ data class LogEntryWithRemark(
 interface LogEntryDao {
     @Insert
     suspend fun insert(logEntry: LogEntry)
+
+    @Delete
+    suspend fun delete(logEntry: LogEntry)
 
     @Transaction
     @Query("SELECT * FROM log_entries ORDER BY timestamp DESC")

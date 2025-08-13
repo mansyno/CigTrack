@@ -40,6 +40,10 @@ class LogViewModel(private val logEntryDao: LogEntryDao, private val remarkDao: 
             logEntryDao.insert(newLogEntry)
         }
     }
+
+    suspend fun deleteLog(logEntry: LogEntryWithRemark) {
+        logEntryDao.delete(logEntry.logEntry)
+    }
 }
 
 class LogViewModelFactory(private val logEntryDao: LogEntryDao, private val remarkDao: RemarkDao) : ViewModelProvider.Factory {
