@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class RemarkSettingsViewModel(private val remarkDao: RemarkDao) : ViewModel() {
 
-    val remarks: StateFlow<List<Remark>> = remarkDao.getAll()
+    val remarks: StateFlow<List<Remark>> = remarkDao.getAllForSettings()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -22,6 +22,12 @@ class RemarkSettingsViewModel(private val remarkDao: RemarkDao) : ViewModel() {
     fun addRemark(remarkText: String) {
         viewModelScope.launch {
             remarkDao.insert(Remark(text = remarkText))
+        }
+    }
+
+    fun updateRemark(remark: Remark) {
+        viewModelScope.launch {
+            remarkDao.update(remark)
         }
     }
 

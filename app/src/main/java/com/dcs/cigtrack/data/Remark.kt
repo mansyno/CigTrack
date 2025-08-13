@@ -1,5 +1,6 @@
 package com.dcs.cigtrack.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -7,5 +8,7 @@ import androidx.room.PrimaryKey
 data class Remark(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val text: String
+    val text: String,
+    @ColumnInfo(defaultValue = "0")
+    val isHidden: Boolean = false
 )

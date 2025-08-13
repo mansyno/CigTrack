@@ -9,8 +9,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RemarkDao {
-    @Query("SELECT * FROM remarks ORDER BY text ASC")
+    @Query("SELECT * FROM remarks WHERE isHidden = 0 ORDER BY text ASC")
     fun getAll(): Flow<List<Remark>>
+
+    @Query("SELECT * FROM remarks ORDER BY text ASC")
+    fun getAllForSettings(): Flow<List<Remark>>
 
     @Insert
     suspend fun insert(remark: Remark)
