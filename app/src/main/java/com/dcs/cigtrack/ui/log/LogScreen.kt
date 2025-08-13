@@ -46,9 +46,9 @@ fun LogScreen(
                     onClick = {
                         coroutineScope.launch {
                             entryToDelete?.let { logViewModel.deleteLog(it) }
+                            showDialog = false
+                            entryToDelete = null
                         }
-                        showDialog = false
-                        entryToDelete = null
                     }
                 ) {
                     Text("Confirm")
