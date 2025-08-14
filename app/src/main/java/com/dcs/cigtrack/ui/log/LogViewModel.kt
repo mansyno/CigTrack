@@ -18,7 +18,7 @@ import java.util.Calendar
 import java.util.Date // Added import
 import java.util.Locale // Added import
 
-class LogViewModel(private val logEntryDao: LogEntryDao, private val remarkDao: RemarkDao) : ViewModel() {
+class LogViewModel(private val logEntryDao: LogEntryDao, remarkDao: RemarkDao) : ViewModel() {
 
     val remarks: StateFlow<List<Remark>> = remarkDao.getAll()
         .stateIn(
