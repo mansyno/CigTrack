@@ -14,10 +14,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -74,23 +77,31 @@ fun RemarkSettingsScreen(
         Column(modifier = Modifier.padding(paddingValues)) {
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(remarks) { remark ->
-                    Row(
+                    Card( // ADDED Card
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(vertical = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
-                        Text(
-                            text = remark.text,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Checkbox(
-                            checked = remark.isHidden,
-                            onCheckedChange = {
-                                viewModel.updateRemark(remark.copy(isHidden = !remark.isHidden))
-                            }
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = remark.text,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Checkbox(
+                                checked = remark.isHidden,
+                                onCheckedChange = {
+                                    viewModel.updateRemark(remark.copy(isHidden = !remark.isHidden))
+                                }
+                            )
+                        }
                     }
                 }
             }

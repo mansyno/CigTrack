@@ -41,8 +41,6 @@ fun LogScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var entryToDelete by remember { mutableStateOf<LogEntryWithRemark?>(null) }
     
-    // Date formatter for headers (yyyy-MM-dd) - consistent with ViewModel
-    val headerDateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
     // Date formatter for individual log item times (HH:mm:ss)
     val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
@@ -189,7 +187,7 @@ fun LogScreen(
                             shadowElevation = 4.dp // Add some elevation to distinguish headers
                         ) {
                             Text(
-                                text = dateString, // Date string directly from map key
+                                text = logViewModel.formatDateString(dateString), // MODIFIED
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -229,7 +227,8 @@ fun LogItemCard(
                 onClick = { /* No action on simple click for now */ },
                 onLongClick = onLongClick
             ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // MODIFIED
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -240,13 +239,13 @@ fun LogItemCard(
         ) {
             Text(
                 text = entry.remark?.text ?: "No Remark",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium, // MODIFIED
                 modifier = Modifier.weight(1f) // Give remark text more space
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = timeFormatter.format(Date(entry.logEntry.timestamp)),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyLarge // MODIFIED
             )
         }
     }

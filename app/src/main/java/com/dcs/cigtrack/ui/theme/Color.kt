@@ -2,18 +2,30 @@ package com.dcs.cigtrack.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
-// Stitch-inspired theme colors
-val Primary = Color(0xFF0D80F2) // bg-[#0d80f2]
-val Background = Color(0xFFF8FAFC) // bg-slate-50
-val Surface = Color(0xFFF8FAFC) // bg-slate-50 (can be same as background or a slight variation)
-val OnPrimary = Color.White // Text/icons on primary color - assuming white for good contrast
-val OnBackground = Color(0xFF0D141C) // #0d141c
-val OnSurface = Color(0xFF49739C) // #49739c
+//Light Theme Colors
+val md_theme_light_primary = Color(0xFF0061A4)
+val md_theme_light_onPrimary = Color(0xFFFFFFFF)
+val md_theme_light_primaryContainer = Color(0xFFD1E4FF)
+val md_theme_light_onPrimaryContainer = Color(0xFF001D36)
+val md_theme_light_secondary = Color(0xFF535F70)
+val md_theme_light_onSecondary = Color(0xFFFFFFFF)
+val md_theme_light_secondaryContainer = Color(0xFFD7E3F7)
+val md_theme_light_onSecondaryContainer = Color(0xFF101C2B)
+val md_theme_light_tertiary = Color(0xFF6B5778)
+val md_theme_light_onTertiary = Color(0xFFFFFFFF)
+val md_theme_light_tertiaryContainer = Color(0xFFF2DAFF)
+val md_theme_light_onTertiaryContainer = Color(0xFF251431)
+val md_theme_light_error = Color(0xFFBA1A1A)
+val md_theme_light_onError = Color(0xFFFFFFFF)
+val md_theme_light_errorContainer = Color(0xFFFFDAD6)
+val md_theme_light_onErrorContainer = Color(0xFF410002)
+val md_theme_light_background = Color(0xFFF8F9FF)
+val md_theme_light_onBackground = Color(0xFF191C20)
+val md_theme_light_surface = Color(0xFFF8F9FF)
+val md_theme_light_onSurface = Color(0xFF191C20)
+val md_theme_light_surfaceVariant = Color(0xFFDFE2EB)
+val md_theme_light_onSurfaceVariant = Color(0xFF43474E)
+val md_theme_light_outline = Color(0xFF73777F)
+val md_theme_light_inverseSurface = Color(0xFF2E3135)
+val md_theme_light_inverseOnSurface = Color(0xFFF0F0F7)
+val md_theme_light_inversePrimary = Color(0xFF9ECAFF)

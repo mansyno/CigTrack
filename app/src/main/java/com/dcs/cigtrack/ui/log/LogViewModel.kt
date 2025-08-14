@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.map // Added import for map operator
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat // Added import
+import java.util.Calendar
 import java.util.Date // Added import
 import java.util.Locale // Added import
 
@@ -60,6 +61,25 @@ class LogViewModel(private val logEntryDao: LogEntryDao, private val remarkDao: 
 
     suspend fun deleteLog(logEntry: LogEntryWithRemark) {
         logEntryDao.delete(logEntry.logEntry)
+    }
+
+    fun formatDateString(dateString: String): String {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
+        val date = inputFormat.parse(dateString) ?: return dateString // Return original if parsing fails
+
+        val calendar = Calendar.getInstance()
+        val today = calendar.time
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        val yesterday = calendar.time
+
+        val dateOnlyFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+
+        return when (dateOnlyFormat.format(date)) {
+            dateOnlyFormat.format(today) -> "Today"
+            dateOnlyFormat.format(yesterday) -> "Yesterday"
+            else -> outputFormat.format(date)
+        }
     }
 }
 
