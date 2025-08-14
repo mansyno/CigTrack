@@ -10,9 +10,12 @@ import com.dcs.cigtrack.data.Remark
 import com.dcs.cigtrack.data.RemarkDao
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-// import kotlinx.coroutines.flow.map // No longer needed for sorting, handled by DAO
+import kotlinx.coroutines.flow.map // Added import for map operator
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat // Added import
+import java.util.Date // Added import
+import java.util.Locale // Added import
 
 class LogViewModel(private val logEntryDao: LogEntryDao, private val remarkDao: RemarkDao) : ViewModel() {
 
@@ -30,6 +33,20 @@ class LogViewModel(private val logEntryDao: LogEntryDao, private val remarkDao: 
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    // New groupedLogEntries StateFlow
+    val groupedLogEntries: StateFlow<Map<String, List<LogEntryWithRemark>>> = logEntries.map { entries ->
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        entries
+            .groupBy { entryWithRemark ->
+                dateFormat.format(Date(entryWithRemark.logEntry.timestamp))
+            }
+            .toSortedMap(compareByDescending { it }) // Sort keys (dates) in descending order
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyMap()
+    )
 
     fun addLog(remarkId: Int?) {
         viewModelScope.launch {

@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,13 +39,16 @@ import com.dcs.cigtrack.LogApplication
 import com.dcs.cigtrack.data.Remark // Assuming Remark data class exists
 import com.dcs.cigtrack.ui.theme.CigTrackTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemarkSettingsScreen(
+    modifier: Modifier = Modifier, // Added modifier parameter
     viewModel: RemarkSettingsViewModel = viewModel(
         factory = RemarkSettingsViewModel.RemarkSettingsViewModelFactory(
             (LocalContext.current.applicationContext as LogApplication).database.remarkDao()
         )
-    )
+    ),
+    onNavigateBack: () -> Unit // New parameter
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var newRemarkText by remember { mutableStateOf("") }
@@ -49,8 +56,19 @@ fun RemarkSettingsScreen(
     val remarks by viewModel.remarks.collectAsState(initial = emptyList())
 
     Scaffold(
+        modifier = modifier, // Applied modifier
         topBar = {
-            TopAppBar(title = { Text("Remark Settings") })
+            TopAppBar(
+                title = { Text("Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -128,6 +146,7 @@ fun RemarkSettingsScreenPreview() {
         // Preview will not work with real ViewModel needing DAO.
         // Consider creating a fake ViewModel for preview or passing null/fake DAO.
         // For now, removing the ViewModel instantiation for preview to compile.
-        Text("Preview of RemarkSettingsScreen (ViewModel logic omitted)")
+        // Also, onNavigateBack would be needed for a complete preview.
+        RemarkSettingsScreen(onNavigateBack = {})
     }
 }

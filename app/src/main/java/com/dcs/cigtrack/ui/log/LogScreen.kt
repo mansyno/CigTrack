@@ -5,13 +5,16 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.dcs.cigtrack.data.LogEntry // Keep for LogEntry itself if needed, or remove if only LogEntryWithRemark is used directly
-import com.dcs.cigtrack.data.LogEntryWithRemark // Added import
+import com.dcs.cigtrack.data.LogEntryWithRemark
 import com.dcs.cigtrack.data.Remark
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -22,127 +25,189 @@ import java.util.Locale
 @Composable
 fun LogScreen(
     logViewModel: LogViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToSettings: () -> Unit // New parameter
 ) {
-    // Collect state from ViewModel
-    val logEntries by logViewModel.logEntries.collectAsState() // Now a List<LogEntryWithRemark>
+    val groupedLogEntries by logViewModel.groupedLogEntries.collectAsState()
     val remarksList by logViewModel.remarks.collectAsState()
-
-    var selectedRemark by remember { mutableStateOf<Remark?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
-    var entryToDelete by remember { mutableStateOf<LogEntryWithRemark?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy - HH:mm:ss", Locale.getDefault()) }
+    // State for the "Add Log" dialog
+    var showAddLogDialog by remember { mutableStateOf(false) }
+    var selectedRemarkForNewLog by remember { mutableStateOf<Remark?>(null) }
+    var remarkDropdownExpanded by remember { mutableStateOf(false) }
 
-    if (showDialog && entryToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("Delete Log Entry") },
-            text = { Text("Are you sure you want to delete this log entry?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            entryToDelete?.let { logViewModel.deleteLog(it) }
-                            showDialog = false
-                            entryToDelete = null
+    // State for the "Delete Log" dialog
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var entryToDelete by remember { mutableStateOf<LogEntryWithRemark?>(null) }
+    
+    // Date formatter for headers (yyyy-MM-dd) - consistent with ViewModel
+    val headerDateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    // Date formatter for individual log item times (HH:mm:ss)
+    val timeFormatter = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(
+                        "Logs", 
+                        modifier = Modifier.fillMaxWidth(), 
+                        textAlign = TextAlign.Center
+                    ) 
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) { // Updated onClick
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = { Text("Log") },
+                icon = { Icon(Icons.Filled.Add, contentDescription = "Log new entry") },
+                onClick = { showAddLogDialog = true },
+                modifier = Modifier.padding(16.dp) // Ensure FAB doesn't overlap status bar
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End, // Changed from EndTop
+        modifier = modifier
+    ) { paddingValues ->
+
+        // "Add Log" Dialog
+        if (showAddLogDialog) {
+            AlertDialog(
+                onDismissRequest = { showAddLogDialog = false },
+                title = { Text("Log New Entry") },
+                text = {
+                    ExposedDropdownMenuBox(
+                        expanded = remarkDropdownExpanded,
+                        onExpandedChange = { remarkDropdownExpanded = !remarkDropdownExpanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = selectedRemarkForNewLog?.text ?: "Select Remark (Optional)",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Remark") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = remarkDropdownExpanded) },
+                            modifier = Modifier
+                                .menuAnchor(MenuAnchorType.PrimaryEditable) // Corrected Anchor Type
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = remarkDropdownExpanded,
+                            onDismissRequest = { remarkDropdownExpanded = false }
+                        ) {
+                            remarksList.forEach { remark ->
+                                DropdownMenuItem(
+                                    text = { Text(remark.text) },
+                                    onClick = {
+                                        selectedRemarkForNewLog = remark
+                                        remarkDropdownExpanded = false
+                                    }
+                                )
+                            }
+                            DropdownMenuItem(
+                                text = { Text("None") },
+                                onClick = {
+                                    selectedRemarkForNewLog = null
+                                    remarkDropdownExpanded = false
+                                }
+                            )
                         }
                     }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            OutlinedTextField(
-                value = selectedRemark?.text ?: "Select Remark",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Remark") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor(MenuAnchorType.PrimaryEditable)
-                    .fillMaxWidth()
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                remarksList.forEach { remark ->
-                    DropdownMenuItem(
-                        text = { Text(remark.text) },
+                },
+                confirmButton = {
+                    Button(
                         onClick = {
-                            selectedRemark = remark
-                            expanded = false
+                            logViewModel.addLog(selectedRemarkForNewLog?.id)
+                            showAddLogDialog = false
+                            selectedRemarkForNewLog = null // Reset for next time
                         }
-                    )
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showAddLogDialog = false }) {
+                        Text("Cancel")
+                    }
                 }
-                 DropdownMenuItem(
-                     text = { Text("None") },
-                     onClick = {
-                         selectedRemark = null
-                         expanded = false
-                     }
-                 )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                logViewModel.addLog(selectedRemark?.id)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .padding(horizontal = 16.dp)
-        ) {
-            Text("Log Cigarette")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (logEntries.isEmpty()) {
-            Text(
-                text = "No logs yet. Add your first one!",
-                modifier = Modifier.padding(horizontal = 16.dp)
             )
+        }
+
+        // "Delete Log" Dialog
+        if (showDeleteDialog && entryToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Delete Log Entry") },
+                text = { Text("Are you sure you want to delete this log entry?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                entryToDelete?.let { logViewModel.deleteLog(it) }
+                                showDeleteDialog = false
+                                entryToDelete = null
+                            }
+                        }
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDeleteDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+        if (groupedLogEntries.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues) // Apply padding from Scaffold
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No logs yet. Add your first one!")
+            }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues), // Apply padding from Scaffold
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                items(logEntries) { entryWithRemark -> // entry is now LogEntryWithRemark
-                    // Pass the LogEntryWithRemark object to LogEntryItem
-                    LogEntryItem(
-                        entry = entryWithRemark, 
-                        dateFormatter = dateFormatter,
-                        onLongClick = {
-                            entryToDelete = entryWithRemark
-                            showDialog = true
+                groupedLogEntries.forEach { (dateString, entriesOnDate) ->
+                    stickyHeader {
+                        Surface(
+                            modifier = Modifier.fillParentMaxWidth(),
+                            shadowElevation = 4.dp // Add some elevation to distinguish headers
+                        ) {
+                            Text(
+                                text = dateString, // Date string directly from map key
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp, horizontal = 16.dp) // Keep horizontal padding consistent
+                            )
                         }
-                    )
-                    HorizontalDivider()
+                    }
+                    items(entriesOnDate, key = { it.logEntry.id }) { entryWithRemark ->
+                        LogItemCard(
+                            entry = entryWithRemark,
+                            timeFormatter = timeFormatter,
+                            onLongClick = {
+                                entryToDelete = entryWithRemark
+                                showDeleteDialog = true
+                            }
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         }
@@ -151,31 +216,38 @@ fun LogScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-// Updated to accept LogEntryWithRemark
-fun LogEntryItem(
-    entry: LogEntryWithRemark, 
-    dateFormatter: SimpleDateFormat,
+fun LogItemCard(
+    entry: LogEntryWithRemark,
+    timeFormatter: SimpleDateFormat,
     onLongClick: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(vertical = 4.dp)
             .combinedClickable(
-                onClick = { /* No action on simple click */ },
+                onClick = { /* No action on simple click for now */ },
                 onLongClick = onLongClick
-            )
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Text(
-            // Display remark text from the related Remark object
-            text = entry.remark?.text ?: "No Remark",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Text(
-            // Access timestamp from the embedded LogEntry object
-            text = dateFormatter.format(Date(entry.logEntry.timestamp)),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = entry.remark?.text ?: "No Remark",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f) // Give remark text more space
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = timeFormatter.format(Date(entry.logEntry.timestamp)),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }

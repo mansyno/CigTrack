@@ -4,12 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,19 +33,21 @@ class MainActivity : ComponentActivity() {
             CigTrackTheme {
                 var showSettings by remember { mutableStateOf(false) }
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(modifier = Modifier.padding(innerPadding)) {
-                        Button(onClick = { showSettings = !showSettings }) {
-                            Text(if (showSettings) "Show Log Screen" else "Show Settings Screen")
-                        }
-                        if (showSettings) {
-                            RemarkSettingsScreen()
-                        } else {
-                            val logViewModel: LogViewModel = viewModel(factory = logViewModelFactory)
-                            LogScreen(
-                                logViewModel = logViewModel,
-                                // Modifier.padding(innerPadding) // This padding is already applied to the Column
-                            )
-                        }
+                    // Apply padding to the content of the Scaffold
+                    val contentModifier = Modifier.padding(innerPadding)
+
+                    if (showSettings) {
+                        RemarkSettingsScreen(
+                            modifier = contentModifier,
+                            onNavigateBack = { showSettings = false }
+                        )
+                    } else {
+                        val logViewModel: LogViewModel = viewModel(factory = logViewModelFactory)
+                        LogScreen(
+                            logViewModel = logViewModel,
+                            modifier = contentModifier,
+                            onNavigateToSettings = { showSettings = true }
+                        )
                     }
                 }
             }
