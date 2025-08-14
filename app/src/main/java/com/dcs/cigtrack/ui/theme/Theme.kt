@@ -3,7 +3,6 @@ package com.dcs.cigtrack.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -22,9 +21,9 @@ private val LightColors = lightColorScheme(
     onError = md_theme_light_onError,
     errorContainer = md_theme_light_errorContainer,
     onErrorContainer = md_theme_light_onErrorContainer,
-    background = Color(0xFFF0F2F5),
+    background = md_theme_light_background, // Explicitly using the new background
     onBackground = md_theme_light_onBackground,
-    surface = Color.White,
+    surface = md_theme_light_surface,       // Explicitly using the new surface
     onSurface = md_theme_light_onSurface,
     surfaceVariant = md_theme_light_surfaceVariant,
     onSurfaceVariant = md_theme_light_onSurfaceVariant,

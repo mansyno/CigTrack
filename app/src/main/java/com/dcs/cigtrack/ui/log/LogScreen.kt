@@ -69,7 +69,7 @@ fun LogScreen(
                 modifier = Modifier.padding(16.dp) // Ensure FAB doesn't overlap status bar
             )
         },
-        floatingActionButtonPosition = FabPosition.End, // Changed from EndTop
+        floatingActionButtonPosition = FabPosition.End, // MODIFIED HERE
         modifier = modifier
     ) { paddingValues ->
 

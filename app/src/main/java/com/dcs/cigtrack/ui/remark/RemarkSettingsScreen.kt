@@ -2,9 +2,9 @@
 
 package com.dcs.cigtrack.ui.remark
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,19 +75,43 @@ fun RemarkSettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-            LazyColumn(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.padding(paddingValues)) { // Main Column for content
+            // Header Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Remark",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = "Visible in dropdown?",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+            // List of Remarks
+            LazyColumn(
+                modifier = Modifier.weight(1f) // LazyColumn takes remaining space
+                // Removed contentPadding here as items and header will have their own consistent padding
+            ) {
                 items(remarks) { remark ->
-                    Card( // ADDED Card
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                            .padding(horizontal = 16.dp, vertical = 4.dp), // Added horizontal padding to align with header
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(horizontal = 16.dp, vertical = 8.dp), // Padding inside the card content
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -105,15 +130,18 @@ fun RemarkSettingsScreen(
                     }
                 }
             }
+
+            // Add Remark Button
             Button(
                 onClick = { showDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(16.dp) // Adjusted padding for consistency
             ) {
                 Text("Add Remark")
             }
 
+            // Add Remark Dialog
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -154,10 +182,6 @@ fun RemarkSettingsScreen(
 @Composable
 fun RemarkSettingsScreenPreview() {
     CigTrackTheme {
-        // Preview will not work with real ViewModel needing DAO.
-        // Consider creating a fake ViewModel for preview or passing null/fake DAO.
-        // For now, removing the ViewModel instantiation for preview to compile.
-        // Also, onNavigateBack would be needed for a complete preview.
         RemarkSettingsScreen(onNavigateBack = {})
     }
 }
