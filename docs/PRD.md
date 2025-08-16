@@ -1,37 +1,30 @@
-# Product Requirements Document (PRD): Smoke Log App v0.1 (MVP)
+# Product Requirements Document (PRD): Smoke Log App v0.3
 
 ## 1. Objective
-To provide an extremely low-friction mobile application for a user to log every cigarette smoked. The primary goal is speed and ease of data entry to ensure consistent tracking during a smoking cessation program.
+To provide a simple, effective mobile application for a user to log every cigarette smoked, manage contextual remarks, and analyze their smoking patterns to support cessation.
 
 ## 2. Target User
-A single, technically-adept user (the developer) who is actively participating in a smoking cessation workshop and needs to replace manual note-taking with a faster, digital solution. The user is running Android 13 on a Samsung S20 FE.
+A single, technically-adept user (the developer) participating in a smoking cessation workshop who requires a digital tool for logging and analysis.
 
-## 3. MVP Feature Set (In Scope)
-The first functional version of the application will be a single-screen experience with the following components:
+## 3. Core Features (As-Built)
+*   **Logging:** A main screen for logging entries with an optional, user-defined remark. A Floating Action Button opens a dialog for quick entry.
+*   **Log History:** A date-grouped list of all past log entries on the main screen, presented in a clean, card-based UI.
+*   **Log Management:** Ability to delete log entries via a long-press confirmation dialog.
+*   **Remark Management:** A dedicated settings screen to add new remarks and to hide/unhide existing remarks from the logging dialog.
+*   **Navigation:** A modern, state-based navigation system using a `TopAppBar` with icons to switch between the Log screen and the Settings screen.
 
-*   **3.1. Instant Log Button:** A large, prominent button. A single tap immediately records the current system timestamp as a new log entry.
-*   **3.2. Optional Remark Dropdown:** A dropdown menu located near the log button, pre-populated with a static list of contextual remarks. If a remark is selected when the log button is tapped, the remark is saved along with the timestamp. If no remark is selected, only the timestamp is saved.
-*   **3.3. Hard-coded Remarks:** The initial list of remarks will be hard-coded inside the application. The list is: "With Coffee", "After Meal", "Waking Up", "Driving", "Stress", "Boredom".
-*   **3.4. Log Display:** A simple, reverse-chronological list on the same screen that displays all saved log entries. Each entry will show the timestamp and the associated remark, if any (e.g., "Aug 11, 2025, 10:45 AM - With Coffee").
+## 4. Future Enhancements / Current Development
+The following features are planned for future iterations.
 
-## 4. Future Enhancements (Post-MVP)
-The following features are planned for future iterations to build upon the core functionality of the MVP:
+*   **In Development:**
+    *   **Data Analysis & Summary Screen:** A dedicated screen to visualize key statistics (daily counts, trigger frequency, time-based patterns, etc.) to provide actionable insights into smoking habits. *See `Analysis_Feature_Concepts.md` for details.*
+*   **Backlog:**
+    *   **Data Export:** Functionality to export the log data to a common format (e.g., CSV).
+    *   **Log Editing:** The ability to edit the timestamp or remark of a past entry.
+    *   **Dark Theme:** Implementation of a dark mode color scheme.
 
-*   **Data Analysis & Summary Screen:** A dedicated screen to visualize key statistics, such as daily/weekly counts, average time between logs, and frequency of remarks.
-*   **Editable Remarks via Settings:** A settings screen allowing the user to add, edit, and delete the list of remarks.
-*   **Data Export:** Functionality to export the log data into a common format (e.g., CSV) for external analysis.
-*   **Log Management:** The ability to edit the timestamp or remark of a past entry, or to delete entries entirely.
-
-## 5. Success Metric
-The MVP will be considered a success when the user can:
-1.  Build a functional, installable APK from the project.
-2.  Install and run the app on their target device.
-3.  Successfully log at least 10 entries using both the instant log button and the remark dropdown.
-4.  View all 10 entries correctly displayed in the on-screen list.
-
-## 6. Technical Stack
+## 5. Technical Stack
 *   **Language:** Kotlin
-*   **UI Framework:** Jetpack Compose
-*   **Data Persistence:** Room Persistence Library (wrapper for built-in SQLite)
-*   **Target Android Version:** Android 13 (API Level 33)
+*   **UI Framework:** Jetpack Compose (Material 3)
+*   **Data Persistence:** Room Persistence Library
 *   **Development Environment:** Android Studio with Gemini AI assistant.
