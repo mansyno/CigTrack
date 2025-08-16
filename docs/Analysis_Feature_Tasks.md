@@ -8,9 +8,9 @@ This document breaks down the development of the Analysis Feature into manageabl
 2.  **[x]** Create `Analysis_Feature_Concepts.md` document (Done).
 3.  **[x]** Create `TDS_Analysis_Feature.md` document (Done).
 4.  **[x]** Create this `Analysis_Feature_Tasks.md` document (Done).
-5.  **[]** Decide on and add the dependency for a Jetpack Compose compatible charting library.
-6.  **[]** Create basic `AnalysisScreen.kt` Composable file with a `Scaffold` and `TopAppBar`.
-7.  **[]** Create basic `AnalysisViewModel.kt` class extending `ViewModel`.
+5.  **[x]** Decide on and add the dependency for a Jetpack Compose compatible charting library.
+6.  **[x]** Create basic `AnalysisScreen.kt` Composable file with a `Scaffold` and `TopAppBar`.
+7.  **[x]** Create basic `AnalysisViewModel.kt` class extending `ViewModel`.
 8.  **[]** Update state-based navigation: Modify MainActivity.kt to manage navigation to the new AnalysisScreen.
 9.  **[]** Add navigation trigger: Implement an `IconButton` to navigate to `AnalysisScreen`.
 10. **[]** Verify navigation to the empty `AnalysisScreen` works.
