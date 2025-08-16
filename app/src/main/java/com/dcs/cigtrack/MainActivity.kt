@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dcs.cigtrack.ui.analysis.AnalysisScreen
 import com.dcs.cigtrack.ui.log.LogScreen
 import com.dcs.cigtrack.ui.log.LogViewModel
 import com.dcs.cigtrack.ui.log.LogViewModelFactory
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             CigTrackTheme {
                 var showSettings by remember { mutableStateOf(false) }
+                var showAnalysis by remember { mutableStateOf(false) }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -59,13 +61,16 @@ class MainActivity : ComponentActivity() {
                             modifier = contentModifier,
                             onNavigateBack = { showSettings = false }
                         )
-                    } else {
+                    } else if (!showAnalysis) {
                         val logViewModel: LogViewModel = viewModel(factory = logViewModelFactory)
                         LogScreen(
                             logViewModel = logViewModel,
                             modifier = contentModifier,
-                            onNavigateToSettings = { showSettings = true }
+                            onNavigateToSettings = { showSettings = true },
+                            onNavigateToAnalysis = { showAnalysis = true }
                         )
+                    } else {
+                        AnalysisScreen(modifier = contentModifier)
                     }
                 }
             }

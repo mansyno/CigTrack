@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,7 +27,8 @@ import java.util.Locale
 fun LogScreen(
     logViewModel: LogViewModel,
     modifier: Modifier = Modifier,
-    onNavigateToSettings: () -> Unit // New parameter
+    onNavigateToSettings: () -> Unit,
+    onNavigateToAnalysis: () -> Unit
 ) {
     val groupedLogEntries by logViewModel.groupedLogEntries.collectAsState()
     val remarksList by logViewModel.remarks.collectAsState()
@@ -55,7 +57,10 @@ fun LogScreen(
                     ) 
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) { // Updated onClick
+                    IconButton(onClick = onNavigateToAnalysis) {
+                        Icon(Icons.Filled.Analytics, contentDescription = "Analysis")
+                    }
+                    IconButton(onClick = onNavigateToSettings) { 
                         Icon(Icons.Filled.Settings, contentDescription = "Settings")
                     }
                 }
