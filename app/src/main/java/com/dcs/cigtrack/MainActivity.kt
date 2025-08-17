@@ -70,7 +70,10 @@ class MainActivity : ComponentActivity() {
                             onNavigateToAnalysis = { showAnalysis = true }
                         )
                     } else {
-                        AnalysisScreen(modifier = contentModifier)
+                        AnalysisScreen(
+                            modifier = contentModifier,
+                            onNavigateBack = { showAnalysis = false }
+                        )
                     }
                 }
             }
